@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import socketserver
+import json
 
 """
 Variables and functions that must be used by all the ClientHandler objects
@@ -27,6 +28,25 @@ class ClientHandler(socketserver.BaseRequestHandler):
             received_string = self.connection.recv(4096)
             
             # TODO: Add handling of received payload from client
+
+
+    def login(self):
+        pass
+
+    def logout(self):
+        pass
+
+    def msg(self):
+        pass
+
+    def names(self):
+        pass
+
+    def history(sefl):
+        pass
+
+    def help(sefl):
+        pass
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
