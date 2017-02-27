@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import socketserver
-
+import socket
+import json
 """
 Variables and functions that must be used by all the ClientHandler objects
 must be written here (e.g. a dictionary for connected clients)
@@ -24,7 +25,20 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
         # Loop that listens for messages from the client
         while True:
+
             received_string = self.connection.recv(4096)
+            #self.connection.sendall("HTTP/1.1 200 OK \r\n\r\n".encode("UTF-8"));
+            
+            print(received_string.decode())
+            payload=json.loads(received_string.decode())
+            #print(payload)
+            print("hei")    
+            print(payload["content"])
+
+
+
+
+
             
             # TODO: Add handling of received payload from client
 
@@ -37,6 +51,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     No alterations are necessary
     """
     allow_reuse_address = True
+    
 
 if __name__ == "__main__":
     """
