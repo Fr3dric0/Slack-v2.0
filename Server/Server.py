@@ -16,6 +16,16 @@ class ClientHandler(socketserver.BaseRequestHandler):
     logic for the server, you must write it outside this class
     """
 
+      self.possible_responses = {
+            'login': self.login,
+            'logout': self.logut,
+            'msg':self.msg,
+            'names':self.names
+            'help': self.names
+            'history': self.history
+        # More key:values pairs are needed  
+        }
+
     def handle(self):
         """
         This method handles the connection between a client and the server.
@@ -28,13 +38,15 @@ class ClientHandler(socketserver.BaseRequestHandler):
         while True:
 
             received_string = self.connection.recv(4096)
-            #self.connection.sendall("HTTP/1.1 200 OK \r\n\r\n".encode("UTF-8"));
+            payload=json.loads(received_string)
+
+            if payload['response'] in self.possible_responses:
             
-            print(received_string.decode())
-            payload=json.loads(received_string.decode())
-            #print(payload)
-            print("hei")    
-            print(payload["content"])
+            return self.possible_responses[payload['response']](payload)
+            
+            else:
+
+                return self.error()
 
 
 
@@ -56,10 +68,13 @@ class ClientHandler(socketserver.BaseRequestHandler):
     def names(self):
         pass
 
-    def history(sefl):
+    def history(self):
         pass
 
-    def help(sefl):
+    def help(self):
+        pass
+
+    def error(self):
         pass
 
 
