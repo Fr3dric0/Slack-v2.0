@@ -2,6 +2,8 @@
 import socketserver
 import socket
 import json
+import re
+import time
 
 """
 Variables and functions that must be used by all the ClientHandler objects
@@ -16,7 +18,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
     logic for the server, you must write it outside this class
     """
 
-      self.possible_responses = {
+    self.possible_responses = {
             'login': self.login,
             'logout': self.logut,
             'msg':self.msg,
@@ -25,11 +27,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
             'history': self.history
         # More key:values pairs are needed  
         }
+    self.loggedin=False
+
 
     def handle(self):
         """
         This method handles the connection between a client and the server.
         """
+
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         self.connection = self.request
@@ -51,27 +56,48 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
             
             # TODO: Add handling of received payload from client
+    def createResponse(username,content,response):
+        message=
 
 
-    def login(self):
+    def login(self, payload):
+        if(self.loggedin):
+            self.history(self, payload)
+        else:
+            if(re.match([a-zA-Z0-9],payload["content"])):
+                self.name=payload["content"]
+                with open(db.json as f:
+                    temp={"username":self.name,"lastlogin":time.time()}
+                    f.write(json.dump(temp))
+                    self.history(payload)
+
+
+
+        
+
+    def logout(self, payload):
+        if(self.loggedin):
+            with open("db.json") as f:
+                temp=json.loads(f.read)
+
+
+                
+
         pass
 
-    def logout(self):
+    def msg(self, payload):
         pass
 
-    def msg(self):
+    def names(self,payload):
         pass
 
-    def names(self):
+    def history(self, payload):
         pass
 
-    def history(self):
+    def help(self, payload):
         pass
 
-    def help(self):
-        pass
-
-    def error(self):
+    def error(self, payload):
         pass
 
 
