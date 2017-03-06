@@ -26,7 +26,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
         # Loop that listens for messages from the client
         while True:
             received_string = self.connection.recv(4096)
-            
+            try:
+                elem = json.loads(received_string.decode())
+                self.connection.sendall(json.dumps({'timestamp': 'now', 'message': 'hei tilbake'}).encode())
+            except Exception as e:
+                print(e)
+
+            #self.connection.sendall("Hei".encode())
+
             # TODO: Add handling of received payload from client
 
 
