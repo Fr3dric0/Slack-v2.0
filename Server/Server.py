@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import socketserver
+import socket
 import json
 
 """
@@ -15,6 +16,16 @@ class ClientHandler(socketserver.BaseRequestHandler):
     logic for the server, you must write it outside this class
     """
 
+      self.possible_responses = {
+            'login': self.login,
+            'logout': self.logut,
+            'msg':self.msg,
+            'names':self.names
+            'help': self.names
+            'history': self.history
+        # More key:values pairs are needed  
+        }
+
     def handle(self):
         """
         This method handles the connection between a client and the server.
@@ -25,15 +36,20 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
         # Loop that listens for messages from the client
         while True:
+
             received_string = self.connection.recv(4096)
-            try:
-                elem = json.loads(received_string.decode())
-                self.connection.sendall(json.dumps({'timestamp': 'now', 'message': 'hei tilbake'}).encode())
-            except Exception as e:
-                print(e)
+            payload=json.loads(received_string)
 
-            #self.connection.sendall("Hei".encode())
+            if payload['response'] in self.possible_responses:
+                return self.possible_responses[payload['response']](payload)
+            else:
+                return self.error()
 
+
+
+
+
+            
             # TODO: Add handling of received payload from client
 
 
@@ -49,10 +65,13 @@ class ClientHandler(socketserver.BaseRequestHandler):
     def names(self):
         pass
 
-    def history(sefl):
+    def history(self):
         pass
 
-    def help(sefl):
+    def help(self):
+        pass
+
+    def error(self):
         pass
 
 
@@ -64,6 +83,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     No alterations are necessary
     """
     allow_reuse_address = True
+    
 
 if __name__ == "__main__":
     """
