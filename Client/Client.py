@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import socket
 from MessageReceiver import MessageReceiver
 from MessageParser import MessageParser
