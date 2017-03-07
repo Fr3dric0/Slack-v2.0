@@ -54,7 +54,10 @@ class Client:
                 continue
 
 
-            method(payload) if payload else method()
+            try:
+                send_payload(method(payload) if payload else method())
+            except Exception as e:
+                pass
 
         #self.connection.sendall(json.dumps({"message": 'hei'}).encode())
         #recieved = self.connection.recv(1024).decode()
