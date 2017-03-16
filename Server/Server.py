@@ -17,17 +17,17 @@ class ClientHandler(socketserver.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
-
-    self.possible_responses = {
-            'login': self.login,
-            'logout': self.logut,
-            'msg':self.msg,
-            'names':self.names
-            'help': self.names
-            'history': self.history
-        # More key:values pairs are needed  
-        }
-    self.loggedin=False
+    def __init__(self):
+        self.possible_responses = {
+                'login': self.login,
+                'logout': self.logout,
+                'msg':self.msg,
+                'names':self.names,
+                'help': self.names,
+                'history': self.history
+            # More key:values pairs are needed  
+            }
+        self.loggedin=False
 
 
     def handle(self):
@@ -56,8 +56,8 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
             
             # TODO: Add handling of received payload from client
-    def createResponse(username,content,response):
-        message=
+    def createResponse(self, username,content,response):
+        message=json.dump({"timestamp":time.time(), "sender":username, "response":response, "content":content})
 
 
     def login(self, payload):
@@ -66,7 +66,8 @@ class ClientHandler(socketserver.BaseRequestHandler):
         else:
             if(re.match([a-zA-Z0-9],payload["content"])):
                 self.name=payload["content"]
-                with open(db.json as f:
+                with open(db.json) as f:
+                    file=f.read()
                     temp={"username":self.name,"lastlogin":time.time()}
                     f.write(json.dump(temp))
                     self.history(payload)
@@ -78,7 +79,17 @@ class ClientHandler(socketserver.BaseRequestHandler):
     def logout(self, payload):
         if(self.loggedin):
             with open("db.json") as f:
-                temp=json.loads(f.read)
+                temp=json.loads(f.read())
+                try:
+                    i=list(filter(lambda p: p["username"]==self.name,temp))[0]
+                    temp.remove(i)
+                    f.write(json.dump(temp))
+                    self.loggedin=False
+                except:
+                    print("username does not exist")
+        else:
+            self.error()
+
 
 
                 
@@ -89,6 +100,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
         pass
 
     def names(self,payload):
+        with open("db.json") as f:
+                temp=json.loads(f.read())
+                #try:
+                    #content= 
+
         pass
 
     def history(self, payload):
