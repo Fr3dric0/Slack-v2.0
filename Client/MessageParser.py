@@ -7,7 +7,11 @@ class MessageParser():
 
         self.possible_responses = {
             'error': self.parse_error,
-            'info': self.parse_info
+            'info': self.parse_info,
+            'login': self.parse_login,
+            'logout': self.parse_logout,
+            'msg': self.parse_msg,
+            'history': self.parse_history
 	    # More key:values pairs are needed	
         }
 
@@ -24,4 +28,16 @@ class MessageParser():
         print("HEI")
     def parse_info(self, payload):
         print("YO")
+
+    def parse_login(self, payload):
+        pass
+    
+    def parse_logout(self, payload):
+        pass
+    
+    def parse_msg(self, payload):
+        pass
+    
+    def parse_history(self, payload):
+        pass
     # Include more methods for handling the different responses... 
