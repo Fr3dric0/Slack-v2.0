@@ -60,7 +60,7 @@ class Client:
 			except Exception as e:
 				pass
 
-		#self.connection.sendall(json.dumps({"message": 'hei'}).encode())
+		#self.connection.sendall(json.dumps({"request": 'history'}).encode())
 		#recieved = self.connection.recv(1024).decode()
 		#print(recieved)
 
@@ -106,7 +106,7 @@ class Client:
 		To get into the action, you the user only has to 'login' with a valid username 
 		(large or small letters and numbers)
 
-		
+
 
 
 		""")
