@@ -17,7 +17,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
-
+    
 
     def handle(self):
         self.possible_responses = {
@@ -25,11 +25,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
                 'logout': self.logout,
                 'msg':self.msg,
                 'names':self.names,
-                'help': self.names,
+                'help': self.help,
                 'history': self.history
             # More key:values pairs are needed  
             }
         self.loggedin=False
+        self.name=None
 
         """
         This method handles the connection between a client and the server.
@@ -48,19 +49,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
             if payload['request'] in self.possible_responses:
                 return self.possible_responses[payload['request']](payload)
             else:
-                return self.error()
+                return self.error(payload)
 
 
-
-
-
-            
-            # TODO: Add handling of received payload from client
-    def createResponse(self, username,content,response):
-        #message=json.dumps({"timestamp":time.time(), "sender":username, "response":response, "content":content})
-        print(username)
-        self.connection.sendall('hei'.encode())
-
+    def createResponse(self, content,response):
+        message=json.dumps({"timestamp":time.time(), "sender":self.name, "response":response, "content":content})
+        self.connection.sendall(message.encode())
 
     def login(self, payload):
         if(self.loggedin):
@@ -68,10 +62,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
         else:
             if(re.match([a-zA-Z0-9],payload["content"])):
                 self.name=payload["content"]
-                with open('db.json') as f:
-                    file=f.read()
-                    temp={"username":self.name,"lastlogin":time.time()}
-                    f.write(json.dump(temp))
+
+                with open(db.json) as f:
+                    fp=f.read()
+
+                    temp={"username":payload['content'],"lastlogin":time.time()}
+                    self.name=payload['content']
+                    fp.append(temp)
+                    f.write(json.dumps(fp))
                     self.history(payload)
 
         
@@ -83,33 +81,67 @@ class ClientHandler(socketserver.BaseRequestHandler):
                 try:
                     i=list(filter(lambda p: p["username"]==self.name,temp))[0]
                     temp.remove(i)
-                    f.write(json.dump(temp))
+                    f.write(json.dumps(temp))
                     self.loggedin=False
                 except:
                     print("username does not exist")
         else:
-            self.error()
+            self.error(payload)
 
 
     def msg(self, payload):
-        pass
+        if(self.loggedin):
+            with open("messages.json") as f:
+                temp=json.load(f)
+                temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
+                f.write(json.dumps(temp))
+                self.history()
+        else:
+            self.error(payload)
+
+
+    
 
     def names(self,payload):
         return self.createResponse('Fr3dric0', '', '')
         with open("db.json") as f:
-                temp=json.loads(f.read())
-                #try:
-                    #content= 
+                temp=f.read()
+                self.createResponse(temp,"names")
 
-        pass
+                
+            
+
+        
 
     def history(self, payload):
-        pass
+        with open("messages.json") as f:
+            self.createResponse(f.read,"messages")
+
+        
 
     def help(self, payload):
-        pass
+        helpstr="""\n
+        ##############################################
+        #               Slack v2.0 HELP              #
+        ##############################################
+        Slack v2.0 is a Command Line Interface (CLI) chatting application, with simple
+        authentication.
+
+        To get into the action, you the user only has to 'login' with a valid username 
+        (large or small letters and numbers)
+
+
+
+
+        """
+        createResponse(helpstr,"help")
+
+        
 
     def error(self, payload):
+
+
+        createResponse("Something went wrong","error")
         pass
 
 
