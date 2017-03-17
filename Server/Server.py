@@ -17,7 +17,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
-
+    
 
     def handle(self):
         self.possible_responses = {
@@ -30,6 +30,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
             # More key:values pairs are needed  
             }
         self.loggedin=False
+        self.name=None
 
         """
         This method handles the connection between a client and the server.
@@ -130,10 +131,28 @@ class ClientHandler(socketserver.BaseRequestHandler):
         
 
     def help(self, payload):
+        helpstr="""\n
+        ##############################################
+        #               Slack v2.0 HELP              #
+        ##############################################
+        Slack v2.0 is a Command Line Interface (CLI) chatting application, with simple
+        authentication.
+
+        To get into the action, you the user only has to 'login' with a valid username 
+        (large or small letters and numbers)
+
+
+
+
+        """
+        createResponse(helpstr,"help")
+
         
-        pass
 
     def error(self, payload):
+
+
+        createResponse("Something went wrong","error")
         pass
 
 
