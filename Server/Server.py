@@ -57,7 +57,9 @@ class ClientHandler(socketserver.BaseRequestHandler):
             
             # TODO: Add handling of received payload from client
     def createResponse(self, username,content,response):
-        message=json.dump({"timestamp":time.time(), "sender":username, "response":response, "content":content})
+        #message=json.dumps({"timestamp":time.time(), "sender":username, "response":response, "content":content})
+        print(username)
+        self.connection.sendall('hei'.encode())
 
 
     def login(self, payload):
@@ -66,13 +68,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
         else:
             if(re.match([a-zA-Z0-9],payload["content"])):
                 self.name=payload["content"]
-                with open(db.json) as f:
+                with open('db.json') as f:
                     file=f.read()
                     temp={"username":self.name,"lastlogin":time.time()}
                     f.write(json.dump(temp))
                     self.history(payload)
-
-
 
         
 
@@ -91,15 +91,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
             self.error()
 
 
-
-                
-
-        pass
-
     def msg(self, payload):
         pass
 
     def names(self,payload):
+        return self.createResponse('Fr3dric0', '', '')
         with open("db.json") as f:
                 temp=json.loads(f.read())
                 #try:

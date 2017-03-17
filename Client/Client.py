@@ -22,6 +22,11 @@ class Client:
 		self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
 		# TODO: Finish init process with necessary code
+
+		self.message_receiver = MessageReceiver(self, self.connection)
+		self.message_receiver.start()
+
+
 		self.run()
 
 	def run(self):
@@ -54,30 +59,30 @@ class Client:
 			else:
 				print('Illegal action! ({})'.format(action))
 				continue
-
 			try:
-				send_payload(method())
+				self.send_payload(method())
 			except Exception as e:
-				pass
-
+				print('SENDING ERROR')
+				print('\033[91m{}\033[0m'.format(e))
+			
 		#self.connection.sendall(json.dumps({"request": 'history'}).encode())
 		#recieved = self.connection.recv(1024).decode()
 		#print(recieved)
-
-
+		
 	def disconnect(self):
 		# TODO: Handle disconnection
-		pass
+		print('disconnect')
+
 
 	def receive_message(self, message):
 		# TODO: Handle incoming message
 		pass
 
 	def send_payload(self, data):
-		payload = json.dumps(data)
+		payload = json.dumps(data).encode()
+		self.connection.sendall(payload)
 		
 		
-	# More methods may be needed!
 	def login(self):
 		user = input('username: ')
 		return { 'request': 'login', 'content': user }
@@ -96,20 +101,9 @@ class Client:
 		return { 'request': 'msg', 'content': msg }
 
 	def help(self):
-		print("""\n
-		##############################################
-		#				Slack v2.0 HELP				 #
-		##############################################
-		Slack v2.0 is a Command Line Interface (CLI) chatting application, with simple
-		authentication.
-
-		To get into the action, you the user only has to 'login' with a valid username 
-		(large or small letters and numbers)
+		return { 'requests': 'help'}
 
 
-
-
-		""")
 
 
 if __name__ == '__main__':
