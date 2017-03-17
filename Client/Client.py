@@ -23,10 +23,6 @@ class Client:
 		
 		# TODO: Finish init process with necessary code
 
-		self.message_receiver = MessageReceiver(self, self.connection)
-		self.message_receiver.start()
-
-
 		self.run()
 
 	def run(self):
@@ -36,6 +32,10 @@ class Client:
 		except ConnectionRefusedError as e:
 			print('Could not connect to server at {}:{}'.format(self.host, self.server_port))
 			sys.exit(1)
+
+		# N.B. This HAVE TO be after Socket has connected (ref. line 32)
+		self.message_receiver = MessageReceiver(self, self.connection)
+		self.message_receiver.start()
 
 		while True:
 			print('--- Choose action ---')
@@ -53,7 +53,7 @@ class Client:
 				method = self.history
 			elif action == 'msg':
 				payload = input('message: ')
-				method = self.message
+				method = self.msg
 			elif action == 'help':
 				method = self.help
 			else:
@@ -76,7 +76,7 @@ class Client:
 
 	def receive_message(self, message):
 		# TODO: Handle incoming message
-		pass
+		print(message)
 
 	def send_payload(self, data):
 		payload = json.dumps(data).encode()

@@ -17,7 +17,6 @@ class ClientHandler(socketserver.BaseRequestHandler):
     only connected clients, and not the server itself. If you want to write
     logic for the server, you must write it outside this class
     """
-    
 
     def handle(self):
         self.possible_responses = {
@@ -103,16 +102,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
     
 
     def names(self,payload):
-        return self.createResponse('Fr3dric0', '', '')
         with open("db.json") as f:
-                temp=f.read()
-                self.createResponse(temp,"names")
+            temp=f.read()
+            self.createResponse(temp,"names")
 
                 
             
 
-        
-
+    
     def history(self, payload):
         with open("messages.json") as f:
             self.createResponse(f.read,"messages")
