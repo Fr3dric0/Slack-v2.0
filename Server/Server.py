@@ -25,7 +25,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
                 'logout': self.logout,
                 'msg':self.msg,
                 'names':self.names,
-                'help': self.names,
+                'help': self.help,
                 'history': self.history
             # More key:values pairs are needed  
             }
@@ -48,7 +48,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
             if payload['request'] in self.possible_responses:
                 return self.possible_responses[payload['request']](payload)
             else:
-                return self.error()
+                return self.error(payload)
 
 
 
@@ -56,8 +56,9 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
             
             # TODO: Add handling of received payload from client
-    def createResponse(self, username,content,response):
-        message=json.dump({"timestamp":time.time(), "sender":username, "response":response, "content":content})
+    def createResponse(self, content,response):
+        message=json.dumps({"timestamp":time.time(), "sender":self.name, "response":response, "content":content})
+        self.connection.sendall(message.encode())
 
 
     def login(self, payload):
@@ -67,9 +68,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
             if(re.match([a-zA-Z0-9],payload["content"])):
                 self.name=payload["content"]
                 with open(db.json) as f:
-                    file=f.read()
-                    temp={"username":self.name,"lastlogin":time.time()}
-                    f.write(json.dump(temp))
+                    fp=f.read()
+
+                    temp={"username":payload['content'],"lastlogin":time.time()}
+                    self.name=payload['content']
+                    fp.append(temp)
+                    f.write(json.dumps(fp))
                     self.history(payload)
 
 
@@ -83,12 +87,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
                 try:
                     i=list(filter(lambda p: p["username"]==self.name,temp))[0]
                     temp.remove(i)
-                    f.write(json.dump(temp))
+                    f.write(json.dumps(temp))
                     self.loggedin=False
                 except:
                     print("username does not exist")
         else:
-            self.error()
+            self.error(payload)
 
 
 
@@ -97,20 +101,36 @@ class ClientHandler(socketserver.BaseRequestHandler):
         pass
 
     def msg(self, payload):
-        pass
+        if(self.loggedin):
+            with open("messages.json") as f:
+                temp=json.load(f)
+                temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
+                f.write(json.dumps(temp))
+                self.history()
+        else:
+            self.error(payload)
+
+
+    
 
     def names(self,payload):
         with open("db.json") as f:
-                temp=json.loads(f.read())
-                #try:
-                    #content= 
+                temp=f.read()
+                self.createResponse(temp,"names")
 
-        pass
+                
+            
+
+        
 
     def history(self, payload):
-        pass
+        with open("messages.json") as f:
+            self.createResponse(f.read,"messages")
+
+        
 
     def help(self, payload):
+        
         pass
 
     def error(self, payload):
