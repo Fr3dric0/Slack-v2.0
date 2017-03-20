@@ -57,7 +57,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	def login(self, payload):
 		if self.loggedin:
-			return self.history(self, payload)
+			return self.history(payload)
 		
 		if not re.match('[a-zA-Z0-9]', payload["content"]):
 			return self.createResponse('Bad username', 'error')
@@ -65,17 +65,20 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		self.name = payload["content"]
 		
 		user = {
-			"username": payload['content'], 
-			"lastlogin": str(time.time())
+			'username': payload['content'], 
+			'lastlogin': str(time.time())
 		}
 			
-		with open('db.json', 'w+') as f:
-			
-			names = f.readlines()
-			
+		with open('db.json', 'r+') as f:
+			a=f.read()
+			print(a)
+			names = json.loads(a)
+			print(names)
 			self.name = payload['content']
 			names.append(user)
-			
+			#print(names)
+			f.seek(0)
+			f.truncate()
 			f.write(json.dumps(names))
 			self.history(payload)
 
@@ -104,7 +107,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				temp=json.load(f)
 				temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
 				f.write(json.dumps(temp))
-				self.history()
+				self.history(payload)
 		else:
 			self.error(payload)
 
@@ -113,8 +116,10 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	def names(self,payload):
 		with open("db.json") as f:
-			temp=f.readlines()
-			self.createResponse(temp,"names")
+			a=f.read()
+			
+			self.createResponse(a,"names")
+			print("hei")
 
 				
 			
@@ -122,7 +127,8 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	
 	def history(self, payload):
 		with open("messages.json") as f:
-			self.createResponse(f.read,"messages")
+		
+			self.createResponse(f.read(),"messages")
 
 		
 
