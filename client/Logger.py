@@ -17,9 +17,21 @@ class Logger:
 
     def message(self, opt):
         if type(opt) == dict:
-            if opt['title']:
-                print(bcolors.BOLD + opt['title'] + bcolors.ENDC)
-            if opt['message']:
-                print(opt['message'])
+            if 'title' in opt:
+                print(bcolors.BOLD + str(opt['title']) + bcolors.ENDC)
+            if 'message' in opt:
+                print(str(opt['message']))
         else:
             print(opt)
+
+    def error(self, opt):
+        if 'title' in opt:
+            print(bcolors.FAIL + bcolors.BOLD + str(opt['title']) + bcolors.ENDC)
+        if 'message' in opt:
+            print(bcolors.FAIL + str(opt['message']) + bcolors.ENDC)
+    
+    def warn(self, opt):
+        if 'title' in opt:
+            print(bcolors.WARNING + bcolors.BOLD + str(opt['title']) + bcolors.ENDC)
+        if 'message' in opt:
+            print(bcolors.WARNING + str(opt['message']) + bcolors.ENDC)

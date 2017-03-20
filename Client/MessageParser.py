@@ -11,7 +11,8 @@ class MessageParser():
             'login': self.parse_login,
             'logout': self.parse_logout,
             'msg': self.parse_msg,
-            'history': self.parse_history
+            'history': self.parse_history,
+            'names': self.parse_names
 	    # More key:values pairs are needed	
         }
 
@@ -21,11 +22,12 @@ class MessageParser():
         if payload['response'] in self.possible_responses:
             return self.possible_responses[payload['response']](payload)
         else:
-            print("YALLAYALLA")
+            print(payload['response'])
             # Response not valid
 
     def parse_error(self, payload):
         print("HEI")
+
     def parse_info(self, payload):
         print("YO")
 
@@ -40,4 +42,10 @@ class MessageParser():
     
     def parse_history(self, payload):
         pass
+
+    def parse_names(self, payload):
+        content = payload['content']
+        return '\n'.join(content)
+
+
     # Include more methods for handling the different responses... 

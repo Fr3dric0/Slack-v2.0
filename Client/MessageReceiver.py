@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
 import json
+from Logger import Logger
 
 class MessageReceiver(Thread):
     """
@@ -23,12 +24,12 @@ class MessageReceiver(Thread):
 
 
     def run(self):
-        # TODO: Make MessageReceiver receive and handle payloads
-        response = None
+        # TODO: Make MessageReceiver receive and handle payloads        
         try:
-            response = json.loads(self.connection.recv(4096).decode())
+            self.client.receive_message(self.connection.recv(4096).decode())
         except Exception as e:
-            print('Response Error:')
-            print(e)
+            self.client.logger.error({
+                'title': 'Response Error', 
+                'message': e
+            })
 
-        self.client.receive_message(response)
