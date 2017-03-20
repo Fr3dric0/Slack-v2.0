@@ -43,7 +43,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		while True:
 
 			received_string = self.connection.recv(4096)
+
 			payload=json.loads(received_string.decode())
+
+			if(received_string.decode=="quit"):
+				self.logout(payload)
 
 			if payload['request'] in self.possible_responses:
 				# Mulig return dreper pipen
@@ -89,26 +93,35 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	def logout(self, payload):
 		if(self.loggedin):
-			with open("db.json") as f:
+			with open("db.json","r+") as f:
 				temp=json.loads(f.read())
 				try:
 					i = list(filter(lambda p: p["username"] == self.name, temp))[0]
 					
 					temp.remove(i)
+					f.seek(0)
+					f.truncate()
 					f.write(json.dumps(temp))
 					
 					self.loggedin = False
+					self.connection.close()
 				except:
 					print("username does not exist")
+				finally:
+					return
 		else:
 			self.error(payload)
 
 
 	def msg(self, payload):
 		if(self.loggedin):
-			with open("messages.json") as f:
-				temp=json.load(f)
+			with open("messages.json", "r+") as f:
+				a=f.read()
+				a = a if len(a) > 0 else '[]'
+				temp=json.load(a)
 				temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
+				f.seek(0)
+				f.truncate()
 				f.write(json.dumps(temp))
 				self.history(payload)
 		else:
@@ -158,8 +171,8 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	def error(self, payload):
 
 
-		createResponse("Something went wrong","error")
-		pass
+		self.createResponse("Something went wrong","error")
+		
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
