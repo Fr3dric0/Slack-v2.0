@@ -46,9 +46,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			payload=json.loads(received_string.decode())
 
 			if payload['request'] in self.possible_responses:
-				return self.possible_responses[payload['request']](payload)
+				# Mulig return dreper pipen
+				# Ja det gjorde den
+				self.possible_responses[payload['request']](payload)
 			else:
-				return self.error(payload)
+				self.error(payload)
 
 
 	def createResponse(self, content, response):
@@ -71,6 +73,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			
 		with open('db.json', 'r+') as f:
 			a=f.read()
+			a = a if len(a) > 0 else '[]'
 			print(a)
 			names = json.loads(a)
 			print(names)
@@ -133,6 +136,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		
 
 	def help(self, payload):
+		# TODO - place in help.txt
 		helpstr="""\n
 		##############################################
 		#               Slack v2.0 HELP              #
