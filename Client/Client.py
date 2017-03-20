@@ -43,7 +43,7 @@ class Client:
 		while True:
 			print('--- Choose action ---')
 			print('\t' + '\n\t'.join(self.legal_methods))
-			action = input('> ') 
+			action = input('> ').strip()
 
 			method = None # Stores the selected methods
 			if action == 'login':
@@ -60,8 +60,12 @@ class Client:
 			elif action == 'help':
 				method = self.help
 			else:
-				print('Illegal action! ({})'.format(action))
+				self.logger.error({
+					'title': 'Illegal action', 
+					'message': 'action: {}'.format(action)
+				})
 				continue
+
 			try:
 				self.send_payload(method())
 			except Exception as e:
@@ -87,9 +91,7 @@ class Client:
 		self.logger.message(self.parser.parse(message))
 		
 
-
 	def send_payload(self, data):
-		
 		payload = json.dumps(data).encode()
 		self.connection.sendall(payload)
 

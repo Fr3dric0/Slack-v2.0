@@ -17,7 +17,10 @@ class MessageParser():
         }
 
     def parse(self, payload):
-        payload = json.loads(payload)
+        try:
+            payload = json.loads(payload)
+        except:
+            return {'title': 'Nothing in response', 'message': payload}
 
         if payload['response'] in self.possible_responses:
             return self.possible_responses[payload['response']](payload)
@@ -26,26 +29,48 @@ class MessageParser():
             # Response not valid
 
     def parse_error(self, payload):
-        print("HEI")
+        return payload['content']
 
     def parse_info(self, payload):
-        print("YO")
+        return payload['content']
 
     def parse_login(self, payload):
-        pass
+        return self._render_history(payload['content'])
     
     def parse_logout(self, payload):
-        pass
-    
+        return payload['content']
+
+
     def parse_msg(self, payload):
-        pass
-    
+        return payload['content']
+
+
     def parse_history(self, payload):
-        pass
+        return payload['content']
+
 
     def parse_names(self, payload):
         content = payload['content']
-        return '\n'.join(content)
+        return content
 
 
-    # Include more methods for handling the different responses... 
+    def _render_history(self, hist):
+        if hist is str:
+            hist = json.loads(hist)
+        
+        data = []
+        for msg in hist:
+            #user = msg['user'] if 'user' in msg else 'server'
+            data.append(chat_elem(msg))
+        
+        return ''.join(data)
+
+
+    def chat_elem(self, item):
+        return """
+        -------------------------------
+        {:>10}
+        {:<15}
+        "-------------------------------"
+        """.format(**item)
+
