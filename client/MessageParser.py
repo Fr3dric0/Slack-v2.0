@@ -1,16 +1,16 @@
 import json
 
 class MessageParser():
-    legal_methods = ['login <username>', 'logout', 'msg <message>', 'history', 'names', 'help']
+    # Store the current chat history with the clients session
+    history = []
 
     def __init__(self):
 
         self.possible_responses = {
             'error': self.parse_error,
             'info': self.parse_info,
-            'login': self.parse_login,
             'logout': self.parse_logout,
-            'msg': self.parse_msg,
+            'message': self.parse_msg,
             'history': self.parse_history,
             'names': self.parse_names
         }
@@ -28,26 +28,34 @@ class MessageParser():
             return self.possible_responses[payload['response']](payload)
         else:
             print(payload['response'])
-            # Response not valid
+
 
     def parse_error(self, payload):
         return payload['content']
 
+
     def parse_info(self, payload):
         return payload['content']
+
 
     def parse_login(self, payload):
         return self._render_history(payload['content'])
     
+
     def parse_logout(self, payload):
         return payload['content']
 
 
     def parse_msg(self, payload):
-        return payload['content']
+        message = { 'username': payload['sender'], 'message': payload['content']}
+
+        msg = self.chat_elem(message)
+        self.history.append(msg) # Append current chat to msg
+        return msg
 
 
     def parse_history(self, payload):
+        print(payload)
         return self._render_history(payload['content'])
 
 
@@ -63,6 +71,8 @@ class MessageParser():
         
         # Generate the chat message
         data = list(map(lambda m: self.chat_elem(m), history))
+
+        self.history = data # Assume we can safelly replace current history
 
         return '\n'.join(data)
 

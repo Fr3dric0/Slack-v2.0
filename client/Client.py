@@ -9,7 +9,6 @@ import json
 
 class Client:
 	legal_methods = ['login <username>', 'logout', 'msg <message>', 'history', 'names', 'help']
-
 	"""
 	This is the chat client class
 	"""
@@ -92,10 +91,11 @@ class Client:
 
 	def send_payload(self, data):
 		payload = json.dumps(data).encode()
-		print('Sending payload')
-		print(payload)
 		self.connection.sendall(payload)
 
+		if data['request'] == 'logout':
+			self.logger.message({'title': 'Logged Out', 'message': 'Bye'})
+			sys.exit(0)
 
 	def login(self):
 		user = input('username: ')
