@@ -23,8 +23,9 @@ class MessageReceiver(Thread):
         
 
     def run(self):
-        # TODO: Make MessageReceiver receive and handle payloads
-        response = self.connection.recv(4096).decode()
-        self.client.receive_message(response)
+        while True:
+            response = self.connection.recv(4096).decode()
+            self.client.receive_message(response)
+            
         
             
