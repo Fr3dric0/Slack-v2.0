@@ -55,7 +55,6 @@ class Client:
 			elif action == 'history':
 				method = self.history
 			elif action == 'msg':
-				payload = input('message: ')
 				method = self.msg
 			elif action == 'help':
 				method = self.help

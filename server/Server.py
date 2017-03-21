@@ -47,7 +47,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 			if payload['request'] in self.possible_responses:
 				# Mulig return dreper pipen
-				# Ja det gjorde den
+				# Ja det gjorde den 
 				self.possible_responses[payload['request']](payload)
 			else:
 				self.error(payload)
@@ -124,17 +124,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			self.createResponse(a,"names")
 			print("hei")
 
-				
-			
-
-	
+					
 	def history(self, payload):
 		with open("messages.json") as f:
-		
-			self.createResponse(f.read(),"messages")
+			self.createResponse(f.read(),"login")
 
 		
-
 	def help(self, payload):
 		# TODO - place in help.txt
 		helpstr="""\n

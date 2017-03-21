@@ -20,7 +20,10 @@ class MessageParser():
         try:
             payload = json.loads(payload)
         except:
-            return {'title': 'Nothing in response', 'message': payload}
+            return {
+                'title': 'Nothing in response', 
+                'message': payload
+            }
 
         if payload['response'] in self.possible_responses:
             return self.possible_responses[payload['response']](payload)
@@ -61,16 +64,17 @@ class MessageParser():
         data = []
         for msg in hist:
             #user = msg['user'] if 'user' in msg else 'server'
-            data.append(chat_elem(msg))
+            data.append(self.chat_elem(msg))
         
         return ''.join(data)
 
 
     def chat_elem(self, item):
+        print(item)
         return """
         -------------------------------
         {:>10}
         {:<15}
         "-------------------------------"
-        """.format(**item)
+        """.format(item)
 
