@@ -161,13 +161,19 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 					
 	def history(self, payload):
+<<<<<<< HEAD
 		if(not self.loggedin):
 			return self.error("You're not logged in")
 
 
+=======
+>>>>>>> e5ca5b7cb7cbeaedc9a012392c23f31accc51317
 		with open("messages.json","r+") as f:
-		
 			self.createResponse(f.read(),"history")
+<<<<<<< HEAD
+=======
+
+>>>>>>> e5ca5b7cb7cbeaedc9a012392c23f31accc51317
 
 		
 	def help(self, payload):
