@@ -87,23 +87,23 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			a = a if len(a) > 0 else '[]'
 			
 			names = json.loads(a)
-			print("hei")
+			
 			if(len(list(filter(lambda p: p["username"] == self.name, names)))<1):
-				print("hei")
+			
 				self.loggedin=True
 				names.append(user)
 				
-				#print(names)
+			
 				f.seek(0)
 				f.truncate()
 				f.write(json.dumps(names))
 				with open("messages.json", "r+") as f:
 					a=f.read()
-					print(a)
+					
 					a = a if len(a) > 0 else '[]'
 					temp=json.loads(a)
 					temp.append({"username":"", "message":self.name+" has logged in", 'timestamp':time.time()})
-					print(temp)
+					
 					f.seek(0)
 					f.truncate()
 					f.write(json.dumps(temp))
@@ -139,12 +139,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		if(self.loggedin):
 			with open("messages.json", "r+") as f:
 				a=f.read()
-				print(a)
-				print("hei")
+				
 				a = a if len(a) > 0 else '[]'
 				temp=json.loads(a)
 				temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
-				print(temp)
+				
 				f.seek(0)
 				f.truncate()
 				f.write(json.dumps(temp))
