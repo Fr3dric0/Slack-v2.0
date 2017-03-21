@@ -80,9 +80,9 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			a = a if len(a) > 0 else '[]'
 			
 			names = json.loads(a)
-			
-			if(len(list(filter(lambda p: p["username"] == self.name, names)))):
-				
+			print("hei")
+			if(len(list(filter(lambda p: p["username"] == self.name, names)))<1):
+				print("hei")
 				self.loggedin=True
 				names.append(user)
 				#print(names)
@@ -100,6 +100,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 					f.seek(0)
 					f.truncate()
 					f.write(json.dumps(temp))
+					print("hallo")
 					self.createResponse(self._get_history(), 'login')
 			else:
 				self.error("Username taken")
