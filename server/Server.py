@@ -54,7 +54,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				# Ja det gjorde den 
 				self.possible_responses[payload['request']](payload)
 			else:
-				self.error(payload)
+				self.error("impossible request")
 
 
 	def createResponse(self, content, response):
@@ -63,10 +63,10 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	def login(self, payload):
 		if self.loggedin:
-			return self.history(payload)
+			return self.error("You're already logged in")
 		
 		if not re.match('[a-zA-Z0-9]', payload["content"]):
-			return self.createResponse('Bad username', 'error')
+			return self.error('Bad username')
 			
 		self.name = payload["content"]
 		
@@ -76,18 +76,37 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		}
 			
 		with open('db.json', 'r+') as f:
+		
 			a=f.read()
 			a = a if len(a) > 0 else '[]'
-			print(a)
+			
 			names = json.loads(a)
-			print(names)
-			self.name = payload['content']
-			names.append(user)
-			#print(names)
-			f.seek(0)
-			f.truncate()
-			f.write(json.dumps(names))
-			self.history(payload)
+
+
+			if(len(list(filter(lambda p: p["username"] == self.name, names)))):
+				
+				self.loggedin=True
+				names.append(user)
+				#print(names)
+				f.seek(0)
+				f.truncate()
+				f.write(json.dumps(names))
+				with open("messages.json", "r+") as f:
+					a=f.read()
+					print(a)
+					print("hei")
+					a = a if len(a) > 0 else '[]'
+					temp=json.loads(a)
+					temp.append({"username":"", "message":self.username+" has logged in", 'timestamp':time.time()})
+					print(temp)
+					f.seek(0)
+					f.truncate()
+					f.write(json.dumps(temp))
+					self.history(payload)
+			else:
+				self.error("Username taken")
+		
+				
 
 		
 
@@ -110,7 +129,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				finally:
 					return
 		else:
-			self.error(payload)
+			self.error("You're not logged in, you broke the system (Thanks obama)")
 
 
 	def msg(self, payload):
@@ -118,15 +137,17 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			with open("messages.json", "r+") as f:
 				a=f.read()
 				print(a)
+				print("hei")
 				a = a if len(a) > 0 else '[]'
-				temp=json.load(a)
+				temp=json.loads(a)
 				temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
+				print(temp)
 				f.seek(0)
 				f.truncate()
 				f.write(json.dumps(temp))
 				self.history(payload)
 		else:
-			self.error(payload)
+			self.error("You're not logged in")
 
 
 	
@@ -140,40 +161,28 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 					
 	def history(self, payload):
-<<<<<<< HEAD
+		if(not self.loggedin):
+			return self.error("You're not logged in")
+
+
 		with open("messages.json","r+") as f:
 		
 			self.createResponse(f.read(),"history")
-=======
-		with open("messages.json") as f:
-			self.createResponse(f.read(),"login")
->>>>>>> 4da2e6e8a65d84b336c349f43d6ab6b4adaab840
 
 		
 	def help(self, payload):
 		# TODO - place in help.txt
-		helpstr="""\n
-		##############################################
-		#               Slack v2.0 HELP              #
-		##############################################
-		Slack v2.0 is a Command Line Interface (CLI) chatting application, with simple
-		authentication.
+		with open("help.txt","r") as f:
 
-		To get into the action, you the user only has to 'login' with a valid username 
-		(large or small letters and numbers)
-
-
-
-
-		"""
-		createResponse(helpstr,"help")
+			helpstr=f.read()
+			createResponse(helpstr,"help")
 
 		
 
-	def error(self, payload):
+	def error(self, something):
 
 
-		self.createResponse("Something went wrong","error")
+		self.createResponse(something,"error")
 		
 
 
