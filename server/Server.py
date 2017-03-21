@@ -5,6 +5,7 @@ import json
 import re
 import time
 
+threads=[]
 """
 Variables and functions that must be used by all the ClientHandler objects
 must be written here (e.g. a dictionary for connected clients)
@@ -28,6 +29,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				'history': self.history
 			# More key:values pairs are needed  
 			}
+
 		self.loggedin=False
 		self.name=None
 
@@ -38,6 +40,8 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		self.ip = self.client_address[0]
 		self.port = self.client_address[1]
 		self.connection = self.request
+
+		threads.append(self)
 
 		# Loop that listens for messages from the client
 		while True:
@@ -58,8 +62,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 
 	def createResponse(self, content, response):
+		
 		message = json.dumps({"timestamp": time.time(), "sender": self.name, "response": response, "content": content})
+		
 		self.connection.sendall(message.encode())
+		
 
 	def login(self, payload):
 		if self.loggedin:
@@ -85,6 +92,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				print("hei")
 				self.loggedin=True
 				names.append(user)
+				
 				#print(names)
 				f.seek(0)
 				f.truncate()
@@ -92,7 +100,6 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				with open("messages.json", "r+") as f:
 					a=f.read()
 					print(a)
-					print("hei")
 					a = a if len(a) > 0 else '[]'
 					temp=json.loads(a)
 					temp.append({"username":"", "message":self.name+" has logged in", 'timestamp':time.time()})
@@ -100,8 +107,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 					f.seek(0)
 					f.truncate()
 					f.write(json.dumps(temp))
-					print("hallo")
-					self.createResponse(self._get_history(), 'login')
+					self.history(payload)
 			else:
 				self.error("Username taken")
 
@@ -117,9 +123,10 @@ class ClientHandler(socketserver.BaseRequestHandler):
 					f.seek(0)
 					f.truncate()
 					f.write(json.dumps(temp))
-					
+					threads.remove(self)
 					self.loggedin = False
 					self.connection.close()
+
 				except:
 					print("username does not exist")
 				finally:
@@ -141,7 +148,10 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				f.seek(0)
 				f.truncate()
 				f.write(json.dumps(temp))
-				self.createResponse(self._get_history(), 'msg')
+				
+				for i in threads:
+					i.connection.sendall({"timestamp": time.time(), "sender": self.name, "response": "message", "content":json.dump(temp)})
+				
 		else:
 			self.error("You're not logged in")
 
@@ -149,11 +159,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	
 
 	def names(self,payload):
+		
 		with open("db.json","r") as f:
+			
 			a=f.read()
 			
+			
 			self.createResponse(a,"names")
-			print("hei")
+			
 
 					
 	def history(self, payload):
