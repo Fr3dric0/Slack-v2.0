@@ -58,8 +58,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 
 	def createResponse(self, content, response):
+		print(11)
 		message = json.dumps({"timestamp": time.time(), "sender": self.name, "response": response, "content": content})
+		print(message)
+		print(12)
 		self.connection.sendall(message.encode())
+		print(13)
 
 	def login(self, payload):
 		if self.loggedin:
@@ -152,11 +156,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	
 
 	def names(self,payload):
+		print("skjera")
 		with open("db.json","r") as f:
+			print(1)
 			a=f.read()
+			print(2)
 			
 			self.createResponse(a,"names")
-			print("hei")
+			print(4)
 
 					
 	def history(self, payload):
