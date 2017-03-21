@@ -108,10 +108,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 					self.createResponse(self._get_history(), 'login')
 			else:
 				self.error("Username taken")
-		
-				
 
-		
 
 	def logout(self, payload):
 		if(self.loggedin):

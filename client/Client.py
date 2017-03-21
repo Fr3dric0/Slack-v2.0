@@ -87,11 +87,13 @@ class Client:
 
 
 	def receive_message(self, message):
-		self.logger.message(self.parser.parse(message))
+		self.logger.message( self.parser.parse(message) )
 		
 
 	def send_payload(self, data):
 		payload = json.dumps(data).encode()
+		print('Sending payload')
+		print(payload)
 		self.connection.sendall(payload)
 
 
