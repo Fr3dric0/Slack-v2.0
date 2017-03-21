@@ -140,14 +140,9 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 					
 	def history(self, payload):
-<<<<<<< HEAD
 		with open("messages.json","r+") as f:
-		
 			self.createResponse(f.read(),"history")
-=======
-		with open("messages.json") as f:
-			self.createResponse(f.read(),"login")
->>>>>>> 4da2e6e8a65d84b336c349f43d6ab6b4adaab840
+
 
 		
 	def help(self, payload):
