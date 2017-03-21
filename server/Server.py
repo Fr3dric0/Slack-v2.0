@@ -117,6 +117,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		if(self.loggedin):
 			with open("messages.json", "r+") as f:
 				a=f.read()
+				print(a)
 				a = a if len(a) > 0 else '[]'
 				temp=json.load(a)
 				temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
@@ -131,7 +132,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	
 
 	def names(self,payload):
-		with open("db.json") as f:
+		with open("db.json","r") as f:
 			a=f.read()
 			
 			self.createResponse(a,"names")
@@ -142,9 +143,9 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	
 	def history(self, payload):
-		with open("messages.json") as f:
+		with open("messages.json","r+") as f:
 		
-			self.createResponse(f.read(),"messages")
+			self.createResponse(f.read(),"history")
 
 		
 
@@ -197,4 +198,4 @@ if __name__ == "__main__":
 
 	# Set up and initiate the TCP server
 	server = ThreadedTCPServer((HOST, PORT), ClientHandler)
-	server.serve_forever()
+	server.serve_forever() #You will serve forever SLAVE!

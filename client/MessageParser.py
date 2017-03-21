@@ -51,7 +51,18 @@ class MessageParser():
 
     def parse_names(self, payload):
         content = payload['content']
-        return content
+        
+        if content is str:
+            content = json.loads(content)
+        
+        data = []
+        for msg in content:
+            #user = msg['user'] if 'user' in msg else 'server'
+            data.append(self.chat_elem(msg))
+        
+        return ''.join(data)
+
+        
 
 
     def _render_history(self, hist):
@@ -61,9 +72,12 @@ class MessageParser():
         data = []
         for msg in hist:
             #user = msg['user'] if 'user' in msg else 'server'
-            data.append(chat_elem(msg))
+            data.append(self.chat_elem(msg))
         
         return ''.join(data)
+
+
+
 
 
     def chat_elem(self, item):
