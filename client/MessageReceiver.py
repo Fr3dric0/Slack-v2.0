@@ -22,15 +22,9 @@ class MessageReceiver(Thread):
         self.connection = connection
         
 
-
     def run(self):
-        # TODO: Make MessageReceiver receive and handle payloads        
-        try:
-            response = self.connection.recv(1024).decode()
-            self.client.receive_message(response)
-        except Exception as e:
-            self.client.logger.error({
-                'title': 'Response Error', 
-                'message': e
-            })
-
+        # TODO: Make MessageReceiver receive and handle payloads
+        response = self.connection.recv(4096).decode()
+        self.client.receive_message(response)
+        
+            

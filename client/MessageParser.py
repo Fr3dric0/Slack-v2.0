@@ -13,16 +13,15 @@ class MessageParser():
             'msg': self.parse_msg,
             'history': self.parse_history,
             'names': self.parse_names
-	    # More key:values pairs are needed	
         }
 
-    def parse(self, payload):
+    def parse(self, data):
         try:
-            payload = json.loads(payload)
-        except:
+            payload = json.loads(data)
+        except Exception as e:
             return {
                 'title': 'Nothing in response', 
-                'message': payload
+                'message': e
             }
 
         if payload['response'] in self.possible_responses:
@@ -49,46 +48,33 @@ class MessageParser():
 
 
     def parse_history(self, payload):
-        return payload['content']
+        return self._render_history(payload['content'])
 
 
     def parse_names(self, payload):
         content = payload['content']
-        
-        if content is str:
-            content = json.loads(content)
-        
-        data = []
-        for msg in content:
-            #user = msg['user'] if 'user' in msg else 'server'
-            data.append(self.chat_elem(msg))
-        
-        return ''.join(data)
-
-        
+        print(content)
+        return ''
 
 
     def _render_history(self, hist):
-        if hist is str:
-            hist = json.loads(hist)
+        history = json.loads(hist) if type(hist) is str else hist
         
-        data = []
-        for msg in hist:
-            #user = msg['user'] if 'user' in msg else 'server'
-            data.append(self.chat_elem(msg))
-        
-        return ''.join(data)
+        # Generate the chat message
+        data = list(map(lambda m: self.chat_elem(m), history))
+
+        return '\n'.join(data)
 
 
-
-
-
-    def chat_elem(self, item):
-        print(item)
+    def chat_elem(self, message):
+        """
+        param:  dict    message     Representing a signle user message
+        """
+        user = message['username'] if 'username' in message else '[server]'
+        msg = message['message'] if 'message' in message else '<missing message>'
         return """
-        -------------------------------
-        {:>10}
-        {:<15}
-        "-------------------------------"
-        """.format(item)
+-------------------------------
+{:<10}
+{:<15}
+-------------------------------""".format(user, msg)
 
