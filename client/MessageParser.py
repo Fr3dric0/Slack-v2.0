@@ -20,7 +20,10 @@ class MessageParser():
         try:
             payload = json.loads(payload)
         except:
-            return {'title': 'Nothing in response', 'message': payload}
+            return {
+                'title': 'Nothing in response', 
+                'message': payload
+            }
 
         if payload['response'] in self.possible_responses:
             return self.possible_responses[payload['response']](payload)
@@ -81,10 +84,11 @@ class MessageParser():
 
 
     def chat_elem(self, item):
+        print(item)
         return """
         -------------------------------
         {:>10}
         {:<15}
         "-------------------------------"
-        """.format(**item)
+        """.format(item)
 

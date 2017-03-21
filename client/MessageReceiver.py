@@ -26,7 +26,7 @@ class MessageReceiver(Thread):
     def run(self):
         # TODO: Make MessageReceiver receive and handle payloads        
         try:
-            response = self.connection.recv(4096).decode()
+            response = self.connection.recv(1024).decode()
             self.client.receive_message(response)
         except Exception as e:
             self.client.logger.error({
