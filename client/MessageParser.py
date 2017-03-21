@@ -58,6 +58,7 @@ class MessageParser():
 
 
     def _render_history(self, hist):
+        hist = hist if len(hist) else '[]'
         history = json.loads(hist) if type(hist) is str else hist
         
         # Generate the chat message

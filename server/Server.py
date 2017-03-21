@@ -67,7 +67,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		
 		if not re.match('[a-zA-Z0-9]', payload["content"]):
 			return self.error('Bad username')
-			
+		
 		self.name = payload["content"]
 		
 		user = {
@@ -76,13 +76,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		}
 			
 		with open('db.json', 'r+') as f:
-		
 			a=f.read()
 			a = a if len(a) > 0 else '[]'
 			
 			names = json.loads(a)
-
-
+			
 			if(len(list(filter(lambda p: p["username"] == self.name, names)))):
 				
 				self.loggedin=True
@@ -97,12 +95,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
 					print("hei")
 					a = a if len(a) > 0 else '[]'
 					temp=json.loads(a)
-					temp.append({"username":"", "message":self.username+" has logged in", 'timestamp':time.time()})
+					temp.append({"username":"", "message":self.name+" has logged in", 'timestamp':time.time()})
 					print(temp)
 					f.seek(0)
 					f.truncate()
 					f.write(json.dumps(temp))
-					self.history(payload)
+					self.createResponse(self._get_history(), 'login')
 			else:
 				self.error("Username taken")
 		
@@ -145,7 +143,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				f.seek(0)
 				f.truncate()
 				f.write(json.dumps(temp))
-				self.history(payload)
+				self.createResponse(self._get_history(), 'msg')
 		else:
 			self.error("You're not logged in")
 
@@ -163,11 +161,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	def history(self, payload):
 		if(not self.loggedin):
 			return self.error("You're not logged in")
-
-		with open("messages.json","r+") as f:
-			self.createResponse(f.read(),"history")
+		
+		self.createResponse(self._get_history(), 'history')
 
 		
+	def _get_history(self):
+		with open('messages.json', 'r+') as f:
+			return f.read()
+	
 	def help(self, payload):
 		# TODO - place in help.txt
 		with open("help.txt","r") as f:
