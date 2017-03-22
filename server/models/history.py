@@ -12,14 +12,14 @@ class History:
     def find(self):
         f = self._read_file()
         try:
-            return json.loads(f)
+            return json.loads(f) if len(f) > 1 else []
         except:
-            return None
+            return []
 
 
     def append(self, sender, message, response = 'message'):
         elem = self.render_mesage(sender, message, response)
-        
+
         try:
             data = json.loads(self._read_file())
         except:
@@ -40,7 +40,7 @@ class History:
 
     def _read_file(self):
         try:
-            with open(filename, 'r+') as f:
+            with open(self.filename, 'r+') as f:
                 return f.read()
         except:
             return str([])
@@ -48,7 +48,7 @@ class History:
     
     def _write_file(self, data):
         try:
-            with open(filename, 'r+') as f:
+            with open(self.filename, 'w') as f:
                 f.write(data)
         except:
             return False
