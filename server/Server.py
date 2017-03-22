@@ -147,7 +147,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			msg = self.history.append(self.name, payload["content"])
 			
 			for i in threads:
-				i.connection.sendall(json.dumps(msg).encode())
+				try:
+					i.connection.sendall(json.dumps(msg).encode())
+				except OSError as ose:
+					print(i)
+					print(ose)
 				
 		else:
 			self.error("You're not logged in")
