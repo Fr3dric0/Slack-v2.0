@@ -39,6 +39,7 @@ class History:
             'content': message
         }
 
+
     def _read_file(self):
         try:
             with open(self.filename, 'r+') as f:

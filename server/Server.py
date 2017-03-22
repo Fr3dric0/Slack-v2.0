@@ -5,6 +5,7 @@ import json
 import re
 import time
 from models.history import History
+from models.names import Names
 
 
 threads=[]
@@ -29,16 +30,13 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				'names':self.names,
 				'help': self.help,
 				'history': self.history
-			# More key:values pairs are needed  
 			}
 
-		self.loggedin=False
-		self.name=None
+		self.logged_in = False
+		self.name = None
 		self.history = History("messages.json")
-		"""
-		This method handles the connection between a client and the server.
-		"""
-
+		self.names = Names('db.json')
+		
 		self.ip = self.client_address[0]
 		self.port = self.client_address[1]
 		self.connection = self.request
@@ -50,23 +48,19 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 			received_string = self.connection.recv(4096)
 
-			payload=json.loads(received_string.decode())
+			payload = json.loads(received_string.decode())
 
-			if(received_string.decode=="quit"):
+			if(received_string.decode == "quit"):
 				self.logout(payload)
 
 			if payload['request'] in self.possible_responses:
-				# Mulig return dreper pipen
-				# Ja det gjorde den 
 				self.possible_responses[payload['request']](payload)
 			else:
-				self.error("impossible request")
+				self.error("Illegal request {}".format(payload['request']))
 
 
-	def createResponse(self, content, response):
-		
-		message = json.dumps({"timestamp": time.time(), "sender": self.name, "response": response, "content": content})
-		
+	def send(self, content, response):
+		message = json.dumps(self.history.render_message(self.name, content, response))
 		self.connection.sendall(message.encode())
 		
 
@@ -79,42 +73,31 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		
 		self.name = payload["content"]
 		
-		user = {
-			'username': payload['content'], 
-			'lastlogin': str(time.time())
-		}
-			
-		with open('db.json', 'r+') as f:
-			a=f.read()
-			a = a if len(a) > 0 else '[]'
-			
-			names = json.loads(a)
-			
-			if(len(list(filter(lambda p: p["username"] == self.name, names)))<1):
-			
-				self.loggedin=True
-				names.append(user)
-				
-			
-				f.seek(0)
-				f.truncate()
-				f.write(json.dumps(names))
-				msg={"timestamp": time.time(), "sender": "server", "response": "info", "content":self.name + " has loggedin"}
+		if self.names.findOne(self.name):
+			return self.error('Username is already taken')
 
-				for i in threads:
-					try:
-						i.connection.sendall(json.dumps(msg).encode())
-					except OSError as ose:
-						print(i)
-						print(ose)
-			else:
-				self.error("Username taken")
+		user = self.names.append(self.name)		
+		self.logged_in = True
+		
+		# Create response payload
+		msg = self.history.render_message('server', 'User: {} has logged in'.format(self.name), 'info')
 
+		# Inform all threads of a new user
+		for i in threads:
+			try:
+				i.connection.sendall(json.dumps(msg).encode())
+			except OSError as ose:
+				print(i)
+				print(ose)
+
+		# Respond to user with the chat history
+		self.history()
+		
 
 	def logout(self, payload):
-		if(self.loggedin):
-			with open("db.json","r+") as f:
-				temp=json.loads(f.read())
+		if(self.logged_in):
+			with open("db.json", "r+") as f:
+				temp = json.loads(f.read())
 				try:
 					i = list(filter(lambda p: p["username"] == self.name, temp))[0]
 					
@@ -123,15 +106,13 @@ class ClientHandler(socketserver.BaseRequestHandler):
 					f.truncate()
 					f.write(json.dumps(temp))
 
-					msg={"timestamp": time.time(), "sender": "server", "response": "info", "content":self.name + " has logged out"}
+					msg = { "timestamp": time.time(), "sender": "server", "response": "info", "content":self.name + " has logged out" }
 
 					for i in threads:
 						i.connection.sendall(json.dumps(msg).encode())
 
-
-
 					threads.remove(self)
-					self.loggedin = False
+					self.logged_in = False
 					self.connection.close()
 
 				except:
@@ -143,7 +124,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 
 	def msg(self, payload):
-		if(self.loggedin):
+		if(self.logged_in):
 			msg = self.history.append(self.name, payload["content"])
 			
 			for i in threads:
@@ -160,7 +141,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	
 
 	def names(self,payload):
-		if(not self.loggedin):
+		if(not self.logged_in):
 			return self.error("You're not logged in")
 		
 		with open("db.json","r") as f:
@@ -168,15 +149,15 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			a=f.read()
 			
 			
-			self.createResponse(a,"names")
+			self.send(a,"names")
 			
 
 					
 	def history(self, payload):
-		if(not self.loggedin):
+		if(not self.logged_in):
 			return self.error("You're not logged in")
 		
-		self.createResponse(self.history.find(), 'history')
+		self.send(self.history.find(), 'history')
 
 		
 	def _get_history(self):
@@ -184,19 +165,13 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			return f.read()
 	
 	def help(self, payload):
-		# TODO - place in help.txt
-		with open("help.txt","r") as f:
+		with open("help.txt", "r") as f:
+			helpstr = f.read()
+			self.send(helpstr, "help")
 
-			helpstr=f.read()
-			createResponse(helpstr,"help")
-
-	
-		
 
 	def error(self, something):
-
-
-		self.createResponse(something,"error")
+		self.send(something, "error")
 		
 
 
