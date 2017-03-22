@@ -30,10 +30,10 @@ class Client:
 
 	def run(self):
 		self.logger.message("""
-///////////////////////////////////////
-//             SLACK v2.0            //
-//   Just like slack, only better!   //
-///////////////////////////////////////
+\033[94m///////////////////////////////////////\033[0m
+\033[94m//             SLACK v2.0            //\033[0m
+\033[94m//\033[0m   Just like slack, only better!   \033[94m//\033[0m 
+\033[94m///////////////////////////////////////\033[0m
 """)
 
 		# Initiate the connection to the server
