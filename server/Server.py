@@ -146,10 +146,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				
 				f.seek(0)
 				f.truncate()
+				hei={"username":self.name, "message":payload['content'], 'timestamp':time.time()}
 				f.write(json.dumps(temp))
 				
 				for i in threads:
-					i.connection.sendall({"timestamp": time.time(), "sender": self.name, "response": "message", "content":json.dump(temp)})
+					i.connection.sendall(json.dumps({"timestamp": time.time(), "sender": self.name, "response": "message", "content":json.dumps(hei)}).encode())
 				
 		else:
 			self.error("You're not logged in")
