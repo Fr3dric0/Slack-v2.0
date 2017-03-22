@@ -22,7 +22,7 @@ class MessageParser():
             payload = json.loads(data)
         except Exception as e:
             raise ParseException(e, 'Could not parse response')
-        print(payload)
+
         if payload['response'] in self.possible_responses:
             return self.possible_responses[payload['response']](payload)
         else:
