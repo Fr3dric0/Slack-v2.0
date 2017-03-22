@@ -102,8 +102,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				msg={"timestamp": time.time(), "sender": "server", "response": "info", "content":self.name + " has loggedin"}
 
 				for i in threads:
-					i.connection.sendall(json.dumps(msg).encode())
-				
+					try:
+						i.connection.sendall(json.dumps(msg).encode())
+					except OSError as ose:
+						print(i)
+						print(ose)
 			else:
 				self.error("Username taken")
 

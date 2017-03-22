@@ -58,7 +58,12 @@ class Client:
 				'title': '\nCHOOSE YOUR ACTION', 
 				'message': '  ' + '\n  '.join(self.legal_methods)
 			})
-			action = input('> ')
+
+			try:
+				action = input('> ')
+			except KeyboardInterrupt as keyey:
+				self.logout()
+				break
 
 			# Kills the program if this is set to true
 			if self.program_die:
