@@ -2,6 +2,7 @@ import socket
 import sys
 from MessageReceiver import MessageReceiver
 from MessageParser import MessageParser
+from parseexception import ParseException
 
 from Logger import Logger
 
@@ -9,6 +10,7 @@ import json
 
 class Client:
 	legal_methods = ['login <username>', 'logout', 'msg <message>', 'history', 'names', 'help']
+	program_die = False
 	"""
 	This is the chat client class
 	"""
@@ -24,25 +26,43 @@ class Client:
 		# Set up the socket connection to the server
 		self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		
-		# TODO: Finish init process with necessary code
 		self.run()
 
 	def run(self):
+		self.logger.message("""
+///////////////////////////////////////
+//             SLACK v2.0            //
+//   Just like slack, only better!   //
+///////////////////////////////////////
+""")
+
 		# Initiate the connection to the server
 		try: 
 			self.connect()
+			self.logger.success({
+				'title': 'Connected to Chat',
+				'message': 'Successfully connected to chat on address: {}:{}'.format(self.host, self.server_port)
+			})
 		except Exception as e:
 			self.logger.error({'title': 'Connection Error', 'message': e})
+			self.logger.message('\nExiting program\n')
 			sys.exit(1)
+
 
 		# N.B. This HAVE TO be after Socket has connected (ref. line 32)
 		self.message_receiver = MessageReceiver(self, self.connection)
 		self.message_receiver.start()
 
 		while True:
-			print('--- Choose action ---')
-			print('\t' + '\n\t'.join(self.legal_methods))
-			action = input('> ').strip()
+			self.logger.message({
+				'title': '\nCHOOSE YOUR ACTION', 
+				'message': '  ' + '\n  '.join(self.legal_methods)
+			})
+			action = input('> ')
+
+			# Kills the program if this is set to true
+			if self.program_die:
+				break
 
 			method = None # Stores the selected methods
 			if action == 'login':
@@ -77,28 +97,40 @@ class Client:
 		try:
 			self.connection.connect((self.host, self.server_port))
 		except ConnectionRefusedError as e:
-			raise Error('Could not connect to server at {}:{}'.format(self.host, self.server_port))
+			raise ConnectionError('Could not connect to server at {}:{}'.format(self.host, self.server_port))
 
 
 	def disconnect(self):
 		# TODO: Handle disconnection
-		print('disconnect')
+		self.logger.message({'title': 'Logged Out', 'message': 'Bye\n'})
+		sys.exit(0)
 
 
 	def receive_message(self, message):
-		self.logger.message( self.parser.parse(message) )
-		
+		if message == 'DIE':
+			self.logger.message('\nShutting down\n[press enter to exit]')
+			self.program_die = True # Shuts the program down in the program-loop
+			sys.exit(0) # Stops the thread (Remove and you'll get an segmentation fault on errors)
+			
+		try:
+			self.logger.message( self.parser.parse(message) )
+		except ParseException as e:
+			# Use parse error to forward errors from the parser
+			self.logger.error({'title': e.args[1], 'message': e.args[0]} if len(e.args) > 1 else str(e))
 
+		print('\n>', end=" ") # Quick fix, so that the user knows what to see
+		
+		
 	def send_payload(self, data):
 		payload = json.dumps(data).encode()
 		self.connection.sendall(payload)
 
 		if data['request'] == 'logout':
-			self.logger.message({'title': 'Logged Out', 'message': 'Bye'})
-			sys.exit(0)
+			self.disconnect()
+
 
 	def login(self):
-		user = input('username: ')
+		user = input('username > ')
 		return { 'request': 'login', 'content': user }
 
 
@@ -115,7 +147,7 @@ class Client:
 
 
 	def msg(self):
-		msg = input('message: ')
+		msg = input('message > ')
 		return { 'request': 'msg', 'content': msg }
 
 
@@ -130,4 +162,10 @@ if __name__ == '__main__':
 
 	No alterations are necessary
 	"""
-	client = Client('localhost', 9998)
+
+	# A user can choose to use custom addresses
+	# if not, the default 'localhost' and 9998 is used
+	host = sys.argv[1] if len(sys.argv) > 1 else 'localhost'
+	port = int(sys.argv[2]) if len(sys.argv) > 2 else 9998
+
+	client = Client(host, port)

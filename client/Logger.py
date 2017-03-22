@@ -24,13 +24,28 @@ class Logger:
         else:
             print(opt)
 
+    def success(self, opt):
+        if type(opt) == str:
+            return print(bcolors.OKGREEN + opt + bcolors.ENDC)
+
+        if 'title' in opt:
+            print(bcolors.OKGREEN + bcolors.BOLD + str(opt['title']) + bcolors.ENDC)
+        if 'message' in opt:
+            print(bcolors.OKGREEN + str(opt['message']) + bcolors.ENDC)
+
     def error(self, opt):
+        if type(opt) == str:
+            return print(bcolors.FAIL + opt + bcolors.ENDC)
+
         if 'title' in opt:
             print(bcolors.FAIL + bcolors.BOLD + str(opt['title']) + bcolors.ENDC)
         if 'message' in opt:
             print(bcolors.FAIL + str(opt['message']) + bcolors.ENDC)
     
     def warn(self, opt):
+        if type(opt) == str:
+            return print(bcolors.WARNING + opt + bcolors.ENDC)
+        
         if 'title' in opt:
             print(bcolors.WARNING + bcolors.BOLD + str(opt['title']) + bcolors.ENDC)
         if 'message' in opt:
