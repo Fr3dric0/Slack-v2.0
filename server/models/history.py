@@ -28,7 +28,7 @@ class History:
 
         data.append(elem)
         self._write_file(json.dumps(data))
-        return data
+        return elem
     
 
     def render_mesage(self, sender, message, response):

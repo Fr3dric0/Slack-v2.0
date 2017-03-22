@@ -22,7 +22,7 @@ class MessageParser():
             payload = json.loads(data)
         except Exception as e:
             raise ParseException(e, 'Could not parse response')
-
+        print(payload)
         if payload['response'] in self.possible_responses:
             return self.possible_responses[payload['response']](payload)
         else:
@@ -45,7 +45,7 @@ class MessageParser():
 
     def parse_login(self, payload):
         return self._render_history(payload['content'])
-        
+
 
     def parse_logout(self, payload):
         return payload['content']
