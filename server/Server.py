@@ -4,6 +4,8 @@ import socket
 import json
 import re
 import time
+from models.history import History
+
 
 threads=[]
 """
@@ -32,7 +34,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 		self.loggedin=False
 		self.name=None
-
+		self.history = History("messages.json")
 		"""
 		This method handles the connection between a client and the server.
 		"""
@@ -72,7 +74,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		if self.loggedin:
 			return self.error("You're already logged in")
 		
-		if not re.match('[a-zA-Z0-9]', payload["content"]):
+		if not re.match('^[A-Za-z0-9]+$',payload["content"]):
 			return self.error('Bad username')
 		
 		self.name = payload["content"]
@@ -97,17 +99,11 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				f.seek(0)
 				f.truncate()
 				f.write(json.dumps(names))
-				with open("messages.json", "r+") as f:
-					a=f.read()
-					
-					a = a if len(a) > 0 else '[]'
-					temp=json.loads(a)
-					temp.append({"username":"", "message":self.name+" has logged in", 'timestamp':time.time()})
-					
-					f.seek(0)
-					f.truncate()
-					f.write(json.dumps(temp))
-					self.history(payload)
+				msg={"timestamp": time.time(), "sender": "server", "response": "info", "content":self.name + " has loggedin"}
+
+				for i in threads:
+					i.connection.sendall(json.dumps(msg).encode())
+				
 			else:
 				self.error("Username taken")
 
@@ -123,6 +119,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
 					f.seek(0)
 					f.truncate()
 					f.write(json.dumps(temp))
+
+					msg={"timestamp": time.time(), "sender": "server", "response": "info", "content":self.name + " has logged out"}
+
+					for i in threads:
+						i.connection.sendall(json.dumps(msg).encode())
+
+
+
 					threads.remove(self)
 					self.loggedin = False
 					self.connection.close()
@@ -137,20 +141,10 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	def msg(self, payload):
 		if(self.loggedin):
-			with open("messages.json", "r+") as f:
-				a=f.read()
-				
-				a = a if len(a) > 0 else '[]'
-				temp=json.loads(a)
-				temp.append({"username":self.name, "message":payload['content'], 'timestamp':time.time()})
-				
-				f.seek(0)
-				f.truncate()
-				hei={"username":self.name, "message":payload['content'], 'timestamp':time.time()}
-				f.write(json.dumps(temp))
-				
-				for i in threads:
-					i.connection.sendall(json.dumps({"timestamp": time.time(), "sender": self.name, "response": "message", "content":json.dumps(hei)}).encode())
+			msg = self.history.append(self.name, payload["content"])
+			
+			for i in threads:
+				i.connection.sendall(json.dumps(msg).encode())
 				
 		else:
 			self.error("You're not logged in")
@@ -159,6 +153,8 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	
 
 	def names(self,payload):
+		if(not self.loggedin):
+			return self.error("You're not logged in")
 		
 		with open("db.json","r") as f:
 			
@@ -173,7 +169,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		if(not self.loggedin):
 			return self.error("You're not logged in")
 		
-		self.createResponse(self._get_history(), 'history')
+		self.createResponse(self.history.find(), 'history')
 
 		
 	def _get_history(self):
@@ -187,6 +183,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			helpstr=f.read()
 			createResponse(helpstr,"help")
 
+	
 		
 
 	def error(self, something):
