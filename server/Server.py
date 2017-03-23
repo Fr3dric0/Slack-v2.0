@@ -91,7 +91,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				print(ose)
 
 		# Respond to user with the chat history
-		self.history()
+		self.history(payload)
 		
 
 	def logout(self, payload):
