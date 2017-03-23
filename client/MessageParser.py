@@ -13,8 +13,7 @@ class MessageParser():
             'logout': self.parse_logout,
             'message': self.parse_msg,
             'history': self.parse_history,
-            'names': self.parse_names,
-            'help': self.parse_help
+            'names': self.parse_names
         }
 
 
@@ -67,9 +66,6 @@ class MessageParser():
         content = payload['content']
         return self._render_names(content)
 
-
-    def parse_help(self, payload):
-        return payload['content']
 
     def _render_history(self, hist):
         """ 
