@@ -62,7 +62,7 @@ class Client:
 			try:
 				action = input('> ')
 			except KeyboardInterrupt as keyey:
-				self.logout()
+				self.send_payload(self.logout())
 				break
 
 			# Kills the program if this is set to true
