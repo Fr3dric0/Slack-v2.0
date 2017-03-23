@@ -14,7 +14,7 @@ class MessageParser():
             'message': self.parse_msg,
             'history': self.parse_history,
             'names': self.parse_names,
-            'helo': self.parse_help
+            'help': self.parse_help
         }
 
 
