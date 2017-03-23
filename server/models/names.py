@@ -21,7 +21,7 @@ class Names:
         names = self.find()
         
         for name in names:
-            if username == names['username']:
+            if username == name['username']:
                 return name
         
         return None
