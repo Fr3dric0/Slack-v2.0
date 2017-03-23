@@ -125,7 +125,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	def msg(self, payload):
 		if(self.logged_in):
-			msg = self.history.append(self.name, payload["content"])
+			msg = self.hist.append(self.name, payload["content"])
 			
 			for i in threads:
 				try:
