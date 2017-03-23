@@ -57,7 +57,8 @@ class History:
     def _read_file(self):
         try:
             with open(self.filename, 'r+') as f:
-                return f.read()
+                a = json.loads(f.read())
+                return json.dumps(a[-10:])
         except:
             return str([])
 
