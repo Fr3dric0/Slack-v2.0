@@ -33,7 +33,7 @@ class Names:
         name = self.render_name(username)
         names.append(name)
         
-        if not self._write_file(json.dumps(names))
+        if not self._write_file(json.dumps(names)):
             raise IOError('Could not append {} to names'.format(username))
 
         return name
