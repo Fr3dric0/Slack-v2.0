@@ -60,7 +60,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 
 	def send(self, content, response):
-		message = json.dumps(self.history.render_message(self.name, content, response))
+		message = json.dumps( self.history.render_message(self.name, content, response) )
 		self.connection.sendall(message.encode())
 		
 
