@@ -78,4 +78,4 @@ class History:
         if msg.lower() == 'server':
             return bcolors.BOLD + msg + bcolors.ENDC
 
-        return '{}{}{}'.format(random.choice(rand_colors), msg, bcolors.ENDC) 
+        return '{}{}{}'.format(random.choice(self.rand_colors), msg, bcolors.ENDC) 
