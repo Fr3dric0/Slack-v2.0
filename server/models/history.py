@@ -19,7 +19,7 @@ class History:
 
 
     def append(self, sender, message, response = 'message'):
-        elem = self.render_mesage(sender, message, response)
+        elem = self.render_message(sender, message, response)
 
         try:
             data = json.loads(self._read_file())
@@ -31,7 +31,7 @@ class History:
         return elem
     
 
-    def render_mesage(self, sender, message, response):
+    def render_message(self, sender, message, response):
         return {
             'timestamp': time.time(),
             'sender': sender,

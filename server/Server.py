@@ -34,7 +34,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 		self.logged_in = False
 		self.name = None
-		self.history = History("messages.json")
+		self.hist = History("messages.json")
 		self.names = Names('db.json')
 		
 		self.ip = self.client_address[0]
@@ -60,12 +60,12 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 
 	def send(self, content, response):
-		message = json.dumps(self.history.render_message(self.name, content, response))
+		message = json.dumps( self.hist.render_message(self.name, content, response) )
 		self.connection.sendall(message.encode())
 		
 
 	def login(self, payload):
-		if self.loggedin:
+		if self.logged_in:
 			return self.error("You're already logged in")
 		
 		if not re.match('^[A-Za-z0-9]+$',payload["content"]):
@@ -80,7 +80,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		self.logged_in = True
 		
 		# Create response payload
-		msg = self.history.render_message('server', 'User: {} has logged in'.format(self.name), 'info')
+		msg = self.hist.render_message('server', 'User: {} has logged in'.format(self.name), 'info')
 
 		# Inform all threads of a new user
 		for i in threads:
@@ -91,7 +91,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 				print(ose)
 
 		# Respond to user with the chat history
-		self.history()
+		self.history(payload)
 		
 
 	def logout(self, payload):
@@ -125,7 +125,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 	def msg(self, payload):
 		if(self.logged_in):
-			msg = self.history.append(self.name, payload["content"])
+			msg = self.hist.append(self.name, payload["content"])
 			
 			for i in threads:
 				try:
@@ -151,18 +151,13 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			
 			self.send(a,"names")
 			
-
 					
 	def history(self, payload):
 		if(not self.logged_in):
 			return self.error("You're not logged in")
 		
-		self.send(self.history.find(), 'history')
+		self.send(self.hist.find(), 'history')
 
-		
-	def _get_history(self):
-		with open('messages.json', 'r+') as f:
-			return f.read()
 	
 	def help(self, payload):
 		with open("help.txt", "r") as f:
