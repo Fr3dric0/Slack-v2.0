@@ -157,7 +157,7 @@ class Client:
 
 
 	def help(self):
-		return { 'requests': 'help'}
+		return { 'request': 'help'}
 
 
 if __name__ == '__main__':
