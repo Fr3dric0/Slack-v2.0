@@ -6,6 +6,15 @@ authentication.
 
 To get into the action, you the user only has to 'login' with a valid username 
 (large or small letters and numbers)
-
+ 
 if you don't understand how this works send a message to Fredrik Lindhagen and tell him to kill himself
+
+
+  login <username> --The method to login
+  logout --logs you out
+  msg <message> --sends a message
+  history --gives you the chat history
+  names --lists all the users in the chat
+  help --this
+
 
