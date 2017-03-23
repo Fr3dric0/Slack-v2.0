@@ -44,6 +44,7 @@ class MessageParser():
 
 
     def parse_login(self, payload):
+        print(payload)
         return self._render_history(payload['content'])
 
 

@@ -160,7 +160,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	def help(self, payload):
 		with open("help.txt", "r") as f:
 			helpstr = f.read()
-			self.send(helpstr, "help")
+			self.send(helpstr, "info")
 
 
 	def error(self, something):
