@@ -34,7 +34,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 		self.logged_in = False
 		self.name = None
-		self.history = History("messages.json")
+		self.hist = History("messages.json")
 		self.names = Names('db.json')
 		
 		self.ip = self.client_address[0]
@@ -60,7 +60,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 
 	def send(self, content, response):
-		message = json.dumps( self.history.render_message(self.name, content, response) )
+		message = json.dumps( self.hist.render_message(self.name, content, response) )
 		self.connection.sendall(message.encode())
 		
 
@@ -80,7 +80,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		self.logged_in = True
 		
 		# Create response payload
-		msg = self.history.render_message('server', 'User: {} has logged in'.format(self.name), 'info')
+		msg = self.hist.render_message('server', 'User: {} has logged in'.format(self.name), 'info')
 
 		# Inform all threads of a new user
 		for i in threads:
@@ -151,18 +151,13 @@ class ClientHandler(socketserver.BaseRequestHandler):
 			
 			self.send(a,"names")
 			
-
 					
 	def history(self, payload):
 		if(not self.logged_in):
 			return self.error("You're not logged in")
 		
-		self.send(self.history.find(), 'history')
+		self.send(self.hist.find(), 'history')
 
-		
-	def _get_history(self):
-		with open('messages.json', 'r+') as f:
-			return f.read()
 	
 	def help(self, payload):
 		with open("help.txt", "r") as f:
