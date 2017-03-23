@@ -25,7 +25,7 @@ class MessageReceiver(Thread):
 
     def run(self):
         while True:
-            response = self.connection.recv(8192).decode()
+            response = self.connection.recv(16384).decode()
 
             if not response:
                 Logger(None).error('LOST CONNECTION WITH SERVER')
