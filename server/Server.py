@@ -50,7 +50,6 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 			payload = json.loads(received_string.decode())
 
-			
 
 			if payload['request'] in self.possible_responses:
 				self.possible_responses[payload['request']](payload)
