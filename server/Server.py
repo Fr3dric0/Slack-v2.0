@@ -65,7 +65,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		
 
 	def login(self, payload):
-		if self.loggedin:
+		if self.logged_in:
 			return self.error("You're already logged in")
 		
 		if not re.match('^[A-Za-z0-9]+$',payload["content"]):
