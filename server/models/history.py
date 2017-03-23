@@ -72,6 +72,9 @@ class History:
         return True
 
     def _generate_rainbow(self, msg):
+        if not msg:
+            return ''
+        
         if msg.lower() == 'server':
             return bcolors.BOLD + msg + bcolors.ENDC
 
