@@ -1,11 +1,25 @@
 import time
 import json
+import random
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 class History:
     """
     Model for the history data. 
     Has the ability to find
     """
+    # Copied from bccolors
+    rand_colors = ['\033[94m', '\033[92m', '\033[93m', '\033[91m']
+
     def __init__(self, filename):
         self.filename = filename
 
@@ -34,7 +48,7 @@ class History:
     def render_message(self, sender, message, response):
         return {
             'timestamp': time.time(),
-            'sender': sender,
+            'sender': self._generate_rainbow(sender),
             'response': response,
             'content': message
         }
@@ -56,3 +70,9 @@ class History:
             return False
         
         return True
+
+    def _generate_rainbow(self, msg):
+        if msg.lower() == 'server':
+            return bcolors.BOLD + msg + bcolors.ENDC
+
+        return '{}{}{}'.format(random.choice(rand_colors), msg, bcolors.ENDC) 
