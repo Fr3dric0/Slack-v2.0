@@ -3,12 +3,11 @@ import time
 
 class Names:
 
-
     def __init__(self, filename):
 
         self.filename = filename
-    
-    
+
+
     def find(self):
         f = self._read_file()
         try:
@@ -39,7 +38,15 @@ class Names:
         return name
 
     def remove(self, username):
-        pass
+        names = self.find()
+        
+        for name in names:
+            if username == name['username']:
+                names.remove(name)
+
+        if not self._write_file(json.dumps(names)):
+            raise IOError('Could not remove {} from names'.format(username))
+
 
     def render_name(self, username):
         return {

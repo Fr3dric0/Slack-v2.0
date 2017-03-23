@@ -34,8 +34,8 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 		self.logged_in = False
 		self.name = None
-		self.hist = History("messages.json")
-		self.names = Names('db.json')
+		self.history_mod = History("messages.json")
+		self.names_mod = Names('db.json')
 		
 		self.ip = self.client_address[0]
 		self.port = self.client_address[1]
@@ -45,11 +45,9 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 		# Loop that listens for messages from the client
 		while True:
-
 			received_string = self.connection.recv(4096)
 
 			payload = json.loads(received_string.decode())
-
 
 			if payload['request'] in self.possible_responses:
 				self.possible_responses[payload['request']](payload)
@@ -58,7 +56,7 @@ class ClientHandler(socketserver.BaseRequestHandler):
 
 
 	def send(self, content, response):
-		message = json.dumps( self.hist.render_message(self.name, content, response) )
+		message = json.dumps( self.history_mod.render_message(self.name, content, response) )
 		self.connection.sendall(message.encode())
 		
 
@@ -71,14 +69,14 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		
 		self.name = payload["content"]
 		
-		if self.names.findOne(self.name):
+		if self.names_mod.findOne(self.name):
 			return self.error('Username is already taken')
 
-		user = self.names.append(self.name)		
+		user = self.names_mod.append(self.name)		
 		self.logged_in = True
 		
 		# Create response payload
-		msg = self.hist.render_message('server', 'User: {} has logged in'.format(self.name), 'info')
+		msg = self.history_mod.render_message('server', 'User: {} has logged in'.format(self.name), 'info')
 
 		# Inform all threads of a new user
 		for i in threads:
@@ -93,68 +91,58 @@ class ClientHandler(socketserver.BaseRequestHandler):
 		
 
 	def logout(self, payload):
-		if(self.logged_in):
-			with open("db.json", "r+") as f:
-				temp = json.loads(f.read())
-				try:
-					i = list(filter(lambda p: p["username"] == self.name, temp))[0]
-					
-					temp.remove(i)
-					f.seek(0)
-					f.truncate()
-					f.write(json.dumps(temp))
-
-					msg = { "timestamp": time.time(), "sender": "server", "response": "info", "content":self.name + " has logged out" }
-
-					for i in threads:
-						i.connection.sendall(json.dumps(msg).encode())
-
-					threads.remove(self)
-					self.logged_in = False
-					self.connection.close()
-
-				except:
-					print("username does not exist")
-				finally:
-					return
-		else:
+		if not self.logged_in:
 			self.error("You're not logged in, you broke the system (Thanks obama)")
+			return
+
+		try:
+			self.names_mod.remove(self.name)
+		except IOError as ioe:
+			print(ioe)
+			
+		msg = self.history_mod.render_message('server', '{} has logged out'.format(self.name), 'info')
+
+		for i in threads:
+			try:
+				i.connection.sendall(json.dumps(msg).encode())
+			except OSError as ose:
+				print(i)
+				print(ose)
+			
+		threads.remove(self)
+			
+		self.logged_in = False
+		self.name = None
+		self.connection.close()
 
 
 	def msg(self, payload):
-		if(self.logged_in):
-			msg = self.hist.append(self.name, payload["content"])
-			
-			for i in threads:
-				try:
-					i.connection.sendall(json.dumps(msg).encode())
-				except OSError as ose:
-					print(i)
-					print(ose)
-				
-		else:
+		if not self.logged_in:
 			self.error("You're not logged in")
+			return
 
+		msg = self.history_mod.append(self.name, payload["content"])
+			
+		for i in threads:
+			try:
+				i.connection.sendall(json.dumps(msg).encode())
+			except OSError as ose:
+				print(i)
+				print(ose)	
 
-	
 
 	def names(self,payload):
 		if(not self.logged_in):
 			return self.error("You're not logged in")
 		
-		with open("db.json","r") as f:
-			
-			a=f.read()
-			
-			
-			self.send(a,"names")
+		self.send(json.dumps(self.names_mod.find()), 'names')
 			
 					
 	def history(self, payload):
 		if(not self.logged_in):
 			return self.error("You're not logged in")
 		
-		self.send(self.hist.find(), 'history')
+		self.send(json.dumps(self.history_mod.find()), 'history')
 
 	
 	def help(self, payload):
@@ -166,7 +154,6 @@ class ClientHandler(socketserver.BaseRequestHandler):
 	def error(self, something):
 		self.send(something, "error")
 		
-
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 	"""

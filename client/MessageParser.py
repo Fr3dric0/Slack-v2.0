@@ -86,7 +86,7 @@ class MessageParser():
         if not users_str:
             return ''
 
-        users = json.loads(users_str)
+        users = json.loads(users_str) if type(users_str) == str else users_str
 
         rendered = []
         for i in range(len(users)):
