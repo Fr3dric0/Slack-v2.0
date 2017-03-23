@@ -54,10 +54,7 @@ class Client:
 		self.message_receiver.start()
 
 		while True:
-			self.logger.message({
-				'title': '\nCHOOSE YOUR ACTION', 
-				'message': '  ' + '\n  '.join(self.legal_methods)
-			})
+			self.logger.message("Type 'help' for help")
 
 			try:
 				action = input('> ')
@@ -115,9 +112,10 @@ class Client:
 		if message == 'DIE':
 			self.logger.message('\nShutting down\n[press enter to exit]')
 			self.program_die = True # Shuts the program down in the program-loop
-			sys.exit(0) # Stops the thread (Remove and you'll get an segmentation fault on errors)
+			sys.exit(0) # Stops the thread (Remove and you'll get an segmentation fault)
 			
 		try:
+			print("")
 			self.logger.message( self.parser.parse(message) )
 		except ParseException as e:
 			# Use parse error to forward errors from the parser
